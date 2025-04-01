@@ -1,6 +1,7 @@
 const resultDisplay = document.querySelector(".result");
 const calDisplay = document.querySelector(".cal");
 
+// Arithmetic operations
 function add(n1, n2) {
     result.data = n1 + n2;
     resultDisplay.innerHTML += ` ${n1} + ${n2} `;
@@ -15,11 +16,15 @@ function sub(n1, n2) {
 
 function mul(n1, n2) {
     result.data = n1 * n2;
-    resultDisplay.innerHTML += `${n1}*${n2} `;
-    calDisplay.innerHTML = `=${result.data}`;
+    resultDisplay.innerHTML += `${n1} * ${n2} `;
+    calDisplay.innerHTML = `= ${result.data}`;
 }
 
 function div(n1, n2) {
+    if (n2 === 0) {
+        alert("Cannot divide by zero.");
+        return;
+    }
     result.data = n1 / n2;
     resultDisplay.innerHTML += `${n1} / ${n2} `;
     calDisplay.innerHTML = `= ${result.data}`;
@@ -28,28 +33,19 @@ function div(n1, n2) {
 function mod(n1, n2) {
     result.data = n1 % n2;
     resultDisplay.innerHTML += `${n1} % ${n2} `;
-    calDisplay.innerHTML = `=${result.data}`;
+    calDisplay.innerHTML = `= ${result.data}`;
 }
 
+// Operation handler
 function operate() {
     let n1 = Number(nom1.data);
     let n2 = Number(nom2.data);
     switch (op.oper) {
-        case "+":
-            add(n1, n2);
-            break;
-        case "-":
-            sub(n1, n2);
-            break;
-        case "*":
-            mul(n1, n2);
-            break;
-        case "/":
-            div(n1, n2);
-            break;
-        case "%":
-            mod(n1, n2);
-            break;
+        case "+": add(n1, n2); break;
+        case "-": sub(n1, n2); break;
+        case "*": mul(n1, n2); break;
+        case "/": div(n1, n2); break;
+        case "%": mod(n1, n2); break;
     }
 }
 
@@ -58,14 +54,19 @@ const op = { oper: "" };
 const nom2 = { data: "" };
 const nom1 = { data: "" };
 
+// Equal button logic
 const eq = document.querySelector(".equal");
 eq.addEventListener("click", () => {
-    if ((nom2.data && nom1.data) !== "") {
-        resultDisplay.innerHTML="";
+    if (nom2.data && nom1.data) {
+        resultDisplay.innerHTML = "";
         operate();
+        nom1.data = result.data; 
+        nom2.data = "";           
+        calDisplay.innerHTML = `=${result.data}`;
     }
 });
 
+// Number buttons
 const nums = document.querySelectorAll(".num");
 nums.forEach(num => {
     num.addEventListener("click", () => {
@@ -79,73 +80,52 @@ nums.forEach(num => {
     });
 });
 
+// Decimal button
 const dots = document.querySelector(".dot");
 dots.addEventListener("click", () => {
     if (op.oper === "") {
-        nom1.data += ".";
-        resultDisplay.innerHTML += ".";
-    } 
-    else {
-        nom2.data += ".";
-        resultDisplay.innerHTML += ".";
+        if (!nom1.data.includes(".")) {
+            nom1.data += ".";
+            resultDisplay.innerHTML += ".";
+        }
+    } else {
+        if (!nom2.data.includes(".")) {
+            nom2.data += ".";
+            resultDisplay.innerHTML += ".";
+        }
     }
 });
-let found = false;
-let sign = ["+","-","/","%","*"];
-let numb = ["1","2","3","4","5","6","7","8","9"]
+
+// Operator buttons 
+let sign = ["+", "-", "/", "%", "*"];
 const ops = document.querySelectorAll(".op");
+
 ops.forEach(ope => {
     ope.addEventListener("click", () => {
-        for(let i = 0;i<sign.length;i++)
-        {
-            if(resultDisplay.innerHTML.slice(0,-1)===sign[i])
-                {
-                    found = true;
-                    break ;
-                }
-        }
         if (op.oper !== "") {
-            if(found)
-            {
-                op.oper=sign[i];
-                resultDisplay.innerHTML = resultDisplay.innerHTML.slice(0, -1) + op.oper;
-                operate();
-                nom1.data = result.data;
-                calDisplay.innerHTML = `=${result.data}`;
-                nom2.data = "";
-            }
-            else{
-                if (nom2.data === ""){
-                    console.log(resultDisplay.innerHTML.slice(0, -1))
-                    resultDisplay.innerHTML = resultDisplay.innerHTML.slice(0, -1) + ope.textContent
-                    op.oper=ope.textContent
-                }
-                else{
-                resultDisplay.innerHTML="";
-                operate();
-                nom1.data = result.data;
-                resultDisplay.innerHTML += `${ope.innerHTML}`;
-                calDisplay.innerHTML = `=${result.data}`;
+            // Replace previous operator if nom2 is empty (consecutive operators)
+            if (nom2.data === "") {
+                resultDisplay.innerHTML = resultDisplay.innerHTML.slice(0, -1) + ope.innerHTML;
                 op.oper = ope.innerHTML;
-                nom2.data = "";
-                }
+                return;
             }
-        } 
-        else {
-            if(found)
-            {
-                op.oper=sign[i];
-                resultDisplay.innerHTML = resultDisplay.innerHTML.slice(0, -1) + op.oper;
-                
+        }
 
-            }
+        if (nom1.data !== "" && nom2.data !== "") {
+            operate();
+            nom1.data = result.data; 
+            nom2.data = "";           
+            op.oper = ope.innerHTML;
+            resultDisplay.innerHTML = `${result.data}${op.oper}`;
+            calDisplay.innerHTML = `=${result.data}`;
+        } else {
             op.oper = ope.innerHTML;
             resultDisplay.innerHTML += `${op.oper}`;
-
         }
     });
 });
 
+// Clear button
 const clc = document.querySelector(".clear");
 clc.addEventListener("click", () => {
     nom1.data = "";
@@ -156,6 +136,7 @@ clc.addEventListener("click", () => {
     calDisplay.innerHTML = "";
 });
 
+// Plus/Minus button
 const pm = document.querySelector(".plusormin");
 pm.addEventListener("click", () => {
     if (nom2.data === "" && op.oper === "") {
@@ -164,13 +145,13 @@ pm.addEventListener("click", () => {
         } else {
             nom1.data = "-" + nom1.data;
         }
-    resultDisplay.innerHTML=nom1.data;
+        resultDisplay.innerHTML = nom1.data;
     } else {
         if (nom2.data[0] === "-") {
             nom2.data = nom2.data.slice(1);
         } else {
             nom2.data = "-" + nom2.data;
         }
-    resultDisplay.innerHTML = resultDisplay.innerHTML.slice(0, -1) + nom2.data;
+        resultDisplay.innerHTML = `${nom1.data}${op.oper}${nom2.data}`;
     }
 });
